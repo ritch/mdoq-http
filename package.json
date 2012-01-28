@@ -4,12 +4,19 @@
   "description": "middleware based http client for node and the browser",
   "version": "0.1.0",
   "repository": {
-    "url": ""
+    "type": "git",
+    "url": "git://github.com/ritch/mdoq-http.git"
   },
   "main": "index.js",
-  "engines": {
-    "node": "~0.6.6"
+  "scripts": {
+    "test": "mocha"
   },
-  "dependencies": {},
+  "engines": {
+    "node": ">= 0.6.0"
+  },
+  "dependencies": {
+    "mdoq": "0.6.x",
+    "request": "2.9.x"
+  },
   "devDependencies": {}
 }
