@@ -1,0 +1,15 @@
+{
+  "author": "Ritchie Martori",
+  "name": "mdoq-http",
+  "description": "middleware based http client for node and the browser",
+  "version": "0.1.0",
+  "repository": {
+    "url": ""
+  },
+  "main": "index.js",
+  "engines": {
+    "node": "~0.6.6"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
