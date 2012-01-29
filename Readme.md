@@ -40,7 +40,26 @@ Currently **mdoq-http** assumes the source of data is **JSON**. This will likely
         console.log(res);
       });
     </script>
+
+## Middleware
+
+Combine with other [mdoq](https://github.com/ritch/mdoq) middleware to pipe data between multiple sources.
+
+    statuses
+      .use(function(next, use) {
+        // tell mongodb middleware to store tweets
+        if(this.res) {
+          this.req.action = 'post';
+          use(require('mdoq-mongodb'));
+        }
     
+        next();
+      })
+      .get({count: 20}, function(err, res) {
+        console.info('These were returned from twitter and stored in mongodb', res);
+      })
+    ;
+
 ## API
 
 See [mdoq](https://github.com/ritch/mdoq) for **API** documentation.

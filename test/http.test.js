@@ -56,8 +56,8 @@ describe('MDOQ HTTP', function(){
     it('should stringify queries', function(done){
       var statuses = http.get({count: 3, include_entities: true});
       
-      expect(statuses.operation.query).to.be.a('object');
-      expect(statuses.operation.query.count).to.equal(3);
+      expect(statuses.req.query).to.be.a('object');
+      expect(statuses.req.query.count).to.equal(3);
       
       statuses.get(function(err, res) {
         expect(res.method).to.equal('GET');
