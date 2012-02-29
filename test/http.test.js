@@ -1,13 +1,14 @@
 var mdoq = require('mdoq')
   , express = require('express')
   , expect = require('chai').expect
+  , PORT = 1234
 ;
 
-function ready(next) {
+function ready(req, res, next) {
   var app = express.createServer();
   
   app.use(express.bodyParser());
-  app.use(function(req, res) {    
+  app.use(function(req, res) {
     res.send({
       method: req.method,
       query: req.query,
@@ -22,19 +23,19 @@ function ready(next) {
     next();
   });
   
-  app.listen(3456);
+  app.listen(PORT);
   
-  this.app = app;
+  req.app = app;
 }
 
-function close(next) {
-  if(this.app.isRunning) {
-    this.app.close();
+function close(req, res, next) {
+  if(req.app.isRunning) {
+    req.app.close();
     next();
   }
 }
 
-var http = mdoq.use(ready).use(require('../')).use(close).use('http://localhost:3456');
+var http = mdoq.use(ready).use(require('../')).use(close).use('http://localhost:' + PORT);
 
 describe('MDOQ HTTP', function(){
   
@@ -44,6 +45,7 @@ describe('MDOQ HTTP', function(){
       http
         .use('/test')
         .get(function(err, res) {
+          expect(res).to.exist;
           expect(res.method).to.equal('GET');
           expect(err).to.not.exist;
           expect(res).to.be.a('object');

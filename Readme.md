@@ -6,7 +6,7 @@
 
     npm install mdoq-http
 
-## mdoq
+## **mdoq**
 
 [Mdoq](https://github.com/ritch/mdoq) provides a consistent **HTTP** style API that lets you re-use middleware across different sources of data in **Node.js** and the **browser**.
 
@@ -19,7 +19,7 @@ Currently **mdoq-http** assumes the source of data is **JSON**. This will likely
 **Node.js**
 
     var mdoq = require('mdoq')
-      , twitter = mdoq(require('mdoq-http')).use('https://api.twitter.com')
+      , twitter = mdoq.require('mdoq-http').use('https://api.twitter.com')
       , statuses = twitter.use('/1/statuses/public_timeline.json')
     ;
 
@@ -46,10 +46,10 @@ Currently **mdoq-http** assumes the source of data is **JSON**. This will likely
 Combine with other [mdoq](https://github.com/ritch/mdoq) middleware to pipe data between multiple sources.
 
     statuses
-      .use(function(next, use) {
+      .use(function(req, res, next, use) {
         // tell mongodb middleware to store tweets
-        if(this.res) {
-          this.req.action = 'post';
+        if(res) {
+          req.method = 'post';
           use(require('mdoq-mongodb'));
         }
     
