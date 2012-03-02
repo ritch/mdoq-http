@@ -13,6 +13,10 @@ module.exports = function(req, res, next, use) {
   options.json = req.data || true;
 
   request(options, function(err, response, body) {
+    Object.keys(response).forEach(function (key) {
+      res[key] = response[key];
+    });
+    
     res.data = body;
     next(err);
   });

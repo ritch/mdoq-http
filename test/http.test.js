@@ -44,12 +44,14 @@ describe('MDOQ HTTP', function(){
     it('should receive a response', function(done) {
       http
         .use('/test')
-        .get(function(err, res) {
-          expect(res).to.exist;
-          expect(res.method).to.equal('GET');
+        .get(function(err, body, req, res) {
+          expect(body).to.exist;
+          expect(body.method).to.equal('GET');
           expect(err).to.not.exist;
-          expect(res).to.be.a('object');
-          expect(res.url).to.equal('/test');
+          expect(body).to.be.a('object');
+          expect(body.url).to.equal('/test');
+          expect(res).to.exist;
+          expect(res.statusCode).to.equal(200);
           done(err);
         })
       ;
@@ -61,9 +63,11 @@ describe('MDOQ HTTP', function(){
       expect(statuses.req.query).to.be.a('object');
       expect(statuses.req.query.count).to.equal(3);
       
-      statuses.get(function(err, res) {
-        expect(res.method).to.equal('GET');
-        expect(res.qs).to.equal('count=3&include_entities=true');
+      statuses.get(function(err, body, req, res) {
+        expect(body.method).to.equal('GET');
+        expect(body.qs).to.equal('count=3&include_entities=true');
+        expect(res).to.exist;
+        expect(res.statusCode).to.equal(200);
         done(err);
       })
     })
@@ -73,9 +77,12 @@ describe('MDOQ HTTP', function(){
   describe('mdoq.post()', function(){
     
     it('should send the provided data to the server as a post', function(done){
-      http.post({test: 123}, function(err, res) {
-        expect(res.method).to.equal('POST');
-        expect(res.body.test).to.equal(123);
+      http.post({test: 123}, function(err, body, req, res) {
+        expect(body.method).to.equal('POST');
+        expect(body.body.test).to.equal(123);
+        expect(res).to.exist;
+        expect(res.statusCode).to.equal(200);
+        
         done(err);
       })
     })
@@ -85,9 +92,11 @@ describe('MDOQ HTTP', function(){
   describe('mdoq.put()', function(){
     
     it('should send the provided data to the server as a put', function(done){
-      http.put({test: 123}, function(err, res) {
-        expect(res.method).to.equal('PUT');
-        expect(res.body.test).to.equal(123);
+      http.put({test: 123}, function(err, body, req, res) {
+        expect(body.method).to.equal('PUT');
+        expect(body.body.test).to.equal(123);
+        expect(res).to.exist;
+        expect(res.statusCode).to.equal(200);
         done(err);
       })
     })
@@ -97,9 +106,11 @@ describe('MDOQ HTTP', function(){
   describe('mdoq.update()', function(){
     
     it('should send the provided data to the server as a put', function(done){
-      http.update({test: 123}, function(err, res) {
-        expect(res.method).to.equal('PUT');
-        expect(res.body.test).to.equal(123);
+      http.update({test: 123}, function(err, body, req, res) {
+        expect(body.method).to.equal('PUT');
+        expect(body.body.test).to.equal(123);
+        expect(res).to.exist;
+        expect(res.statusCode).to.equal(200);
         done(err);
       })
     })
@@ -109,8 +120,10 @@ describe('MDOQ HTTP', function(){
   describe('mdoq.del()', function(){
     
     it('should send the provided data to the server as a delete', function(done){
-      http.del({test: 123}, function(err, res) {
-        expect(res.method).to.equal('DELETE');
+      http.del({test: 123}, function(err, body, req, res) {
+        expect(body.method).to.equal('DELETE');
+        expect(res).to.exist;
+        expect(res.statusCode).to.equal(200);
         done(err);
       })
     })

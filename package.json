@@ -2,7 +2,7 @@
   "author": "Ritchie Martori",
   "name": "mdoq-http",
   "description": "middleware based http client for node and the browser",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "repository": {
     "type": "git",
     "url": "git://github.com/ritch/mdoq-http.git"
@@ -15,7 +15,7 @@
     "node": ">= 0.6.0"
   },
   "dependencies": {
-    "mdoq": "0.7.4",
+    "mdoq": "0.7.5",
     "request": "2.9.x"
   },
   "devDependencies": {}
