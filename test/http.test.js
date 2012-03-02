@@ -72,6 +72,19 @@ describe('MDOQ HTTP', function(){
       })
     })
     
+    it('should still work even if there is not a response', function(done) {
+      mdoq
+        .require('mdoq-http')
+        .use('http://this-url-does-not-exist.flargnargs/foo/bar/' + Math.random())
+        .get(function(err, body, req, res) {
+          expect(err).to.exist;
+          expect(err.code).to.equal('ENOTFOUND');
+          expect(res).to.not.exist;
+          done();
+        })
+      ;
+    })
+    
   })
   
   describe('mdoq.post()', function(){
