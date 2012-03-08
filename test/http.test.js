@@ -14,7 +14,8 @@ function ready(req, res, next) {
       query: req.query,
       url: req.url,
       body: req.body,
-      qs: req.url.split('?')[1]
+      qs: req.url.split('?')[1],
+      headers: req.headers
     })
   });
   
@@ -141,6 +142,18 @@ describe('MDOQ HTTP', function(){
       })
     })
 
+  })
+  
+  describe('Modifiers', function(){
+    describe('client.addHeader(key, val)', function(){
+      it('should add the header to the request', function(done) {
+        http.addHeader('foo', 'bar').get(function (err, res) {
+          expect(res.headers).to.exist;
+          expect(res.headers.foo).to.equal('bar');
+          done(err);
+        })
+      })
+    })
   })
   
 })

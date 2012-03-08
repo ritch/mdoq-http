@@ -1,8 +1,11 @@
 var request = require('request')
   , qs = require('querystring');
 
-// mdoq-http
-module.exports = function(req, res, next, use) {
+/**
+ * Simple wrapper around `request`.
+ */
+
+var middleware = function(req, res, next, use) {
   var self = this
     , options = {}
     , query = qs.stringify(req.query);
@@ -11,6 +14,7 @@ module.exports = function(req, res, next, use) {
   options.url = req.url + (query && '?' + query) || '';
   options.method = req.method;
   options.json = req.data || true;
+  options.headers = req.headers;
 
   request(options, function(err, response, body) {
     response && Object.keys(response).forEach(function (key) {
@@ -21,3 +25,18 @@ module.exports = function(req, res, next, use) {
     next(err);
   });
 }
+
+/**
+ * Utils
+ */
+ 
+middleware.addHeader = function (key, val) {
+  (this.req.headers || (this.req.headers = {}))[key] = val;
+  return this;
+}
+
+/**
+ * Export the middleware
+ */
+ 
+module.exports = middleware;
