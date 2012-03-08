@@ -31,7 +31,7 @@ var middleware = function(req, res, next, use) {
  */
  
 middleware.addHeader = function (key, val) {
-  (this.req.headers || (this.req.headers = {}))[key] = val;
+  ((this.req = this.req || {}).headers || (this.req.headers = {}))[key] = val;
   return this;
 }
 
