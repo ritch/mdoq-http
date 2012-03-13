@@ -8,11 +8,7 @@
 
 ## **mdoq**
 
-[Mdoq](https://github.com/ritch/mdoq) provides a consistent **HTTP** style API that lets you re-use middleware across different sources of data in **Node.js** and the **browser**.
-
-## JSON
-
-Currently **mdoq-http** assumes the source of data is **JSON**. This will likely change in future versions.
+[Mdoq](https://github.com/ritch/mdoq) provides a consistent **HTTP** style API that lets you re-use middleware across different sources of data in **Node.js** and the **browser** (expiremenatl).
 
 ## Examples
 
@@ -26,20 +22,6 @@ Currently **mdoq-http** assumes the source of data is **JSON**. This will likely
     statuses.get({count: 3, include_entities: true}, function(err, res) {
       console.info(res);
     });
-    
-**Browser**
-
-    <script src="jquery.js"></script>
-    <script src="mdoq.js"></script>
-    <script>
-      var twitter = mdoq.use('https://twitter.com/')
-        , statuses = twitter.use('/1/statuses/public_timeline.json')
-      ;
-
-      statuses.get({count: 3, include_entities: true}, function(err, res) {
-        console.log(res);
-      });
-    </script>
 
 ## Middleware
 
@@ -59,6 +41,17 @@ Combine with other [mdoq](https://github.com/ritch/mdoq) middleware to pipe data
         console.info('These were returned from twitter and stored in mongodb', res);
       })
     ;
+
+## Streaming Files
+
+Post a file to stream it over HTTP.
+
+    require('mdoq')
+    .require('mdoq-http')
+    .use('http://foo.com/upload')
+    .post(fs.createReadStream('./file.jpg'), function(err) {
+      console.info(err || 'uploaded!');
+    })
 
 ## API
 

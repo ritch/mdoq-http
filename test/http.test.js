@@ -6,17 +6,32 @@ var mdoq = require('mdoq')
 
 function ready(req, res, next) {
   var app = express.createServer();
-  
   app.use(express.bodyParser());
+  
+  app.get('/file', function (req, res, next) {
+    res.header('Content-Type', 'image/jpeg');
+    require('fs')
+      .createReadStream(__dirname + '/support/eg.jpg')
+      .pipe(res)
+    ;
+  })
+  
   app.use(function(req, res) {
-    res.send({
-      method: req.method,
-      query: req.query,
-      url: req.url,
-      body: req.body,
-      qs: req.url.split('?')[1],
-      headers: req.headers
-    })
+    
+    if(req.method == 'POST' && ~req.headers['content-type'].indexOf('jpeg')) { 
+      res.header('Content-Type', req.header('Content-Type'));
+      req.pipe(res);
+    } else {
+      res.send({
+        method: req.method,
+        query: req.query,
+        url: req.url,
+        body: req.body,
+        qs: req.url.split('?')[1],
+        headers: req.headers,
+        resHeaders: res.headers
+      })
+    }
   });
   
   app.on('listening', function() {
@@ -100,7 +115,7 @@ describe('MDOQ HTTP', function(){
         done(err);
       })
     })
-
+  
   })
   
   describe('mdoq.put()', function(){
@@ -152,6 +167,25 @@ describe('MDOQ HTTP', function(){
           expect(res.headers.foo).to.equal('bar');
           done(err);
         })
+      })
+    })
+  })
+  
+  describe('Streaming File', function(){
+    it('should stream the file to the server', function(done) {
+      var file = require('fs').createReadStream(__dirname + '/support/eg.jpg');
+      
+      http.post(file, function (err, res) {
+        expect(res).to.exist;
+        done(err);
+      });
+    })
+    
+    it('should get the file', function(done) {
+      http.use('/file').get(function (err, res) {
+        var buf = require('fs').readFileSync(__dirname + '/support/eg.jpg').toString();
+        expect(buf.length).to.equal(res.length);
+        done(err);
       })
     })
   })

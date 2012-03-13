@@ -13,17 +13,40 @@ var middleware = function(req, res, next, use) {
   // transform req into request options
   options.url = req.url + (query && '?' + query) || '';
   options.method = req.method;
-  options.json = req.data || true;
   options.headers = req.headers;
 
-  request(options, function(err, response, body) {
-    response && Object.keys(response).forEach(function (key) {
-      res[key] = response[key];
-    });
+  if((req.method === 'POST' || req.method === 'PUT') && req.body && req.body.readable) {
+    req.body.pause();
+    req.body.pipe(request(options, function(err, response, body) {
+      response && Object.keys(response).forEach(function (key) {
+        res[key] = response[key];
+      });
+
+      res.data = body;
+      next(err);
+    }));
+    req.body.resume();
+  } else {
+    if(typeof req.body === 'object') {
+      options.json = req.data || true;
+    }
     
-    res.data = body;
-    next(err);
-  });
+    request(options, function(err, response, body) {
+      // json content type
+      if(response && response.headers['content-type'] && ~response.headers['content-type'].indexOf('application/json') && typeof body === 'string') {
+        body = JSON.parse(response.body);
+      }
+      
+      response && Object.keys(response).forEach(function (key) {
+        res[key] = response[key];
+      });
+
+      res.data = body;
+      next(err);
+    });
+  }
+
+
 }
 
 /**
