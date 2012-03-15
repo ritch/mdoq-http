@@ -2,18 +2,18 @@ var mdoq = require('mdoq')
   , express = require('express')
   , expect = require('chai').expect
   , PORT = 1234
+  , fs = require('fs')
 ;
 
-function ready(req, res, next) {
-  var app = express.createServer();
+var app;
+
+beforeEach(function(done){
+  app = express.createServer();
   app.use(express.bodyParser());
   
   app.get('/file', function (req, res, next) {
-    res.header('Content-Type', 'image/jpeg');
-    require('fs')
-      .createReadStream(__dirname + '/support/eg.jpg')
-      .pipe(res)
-    ;
+    // res.download(__dirname + '/support/eg.jpg');
+    fs.createReadStream(__dirname + '/support/eg.jpg').pipe(res);
   })
   
   app.use(function(req, res) {
@@ -34,24 +34,18 @@ function ready(req, res, next) {
     }
   });
   
-  app.on('listening', function() {
-    app.isRunning = true;
-    next();
-  });
+  app.once('listening', function () {
+    done();
+  })
   
   app.listen(PORT);
-  
-  req.app = app;
-}
+})
 
-function close(req, res, next) {
-  if(req.app.isRunning) {
-    req.app.close();
-    next();
-  }
-}
+afterEach(function(){
+  app.close();
+})
 
-var http = mdoq.use(ready).use(require('../')).use(close).use('http://localhost:' + PORT);
+var http = mdoq.use(require('../')).use('http://localhost:' + PORT);
 
 describe('MDOQ HTTP', function(){
   
@@ -181,13 +175,12 @@ describe('MDOQ HTTP', function(){
       });
     })
     
-    it('should get the file', function(done) {
-      http.use('/file').get(function (err, res) {
-        var buf = require('fs').readFileSync(__dirname + '/support/eg.jpg').toString();
-        expect(buf.length).to.equal(res.length);
+    it('should stream the file', function(done) {
+      var out = fs.createWriteStream(__dirname + '/support/got-eg.jpg');
+      
+      http.use('/file').pipe(out).get(function (err) {
         done(err);
-      })
+      });
     })
   })
-  
 })

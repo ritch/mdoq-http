@@ -44,14 +44,29 @@ Combine with other [mdoq](https://github.com/ritch/mdoq) middleware to pipe data
 
 ## Streaming Files
 
-Post a file to stream it over HTTP.
+Post a file to stream over HTTP.
 
     require('mdoq')
-    .require('mdoq-http')
-    .use('http://foo.com/upload')
-    .post(fs.createReadStream('./file.jpg'), function(err) {
-      console.info(err || 'uploaded!');
-    })
+      .require('mdoq-http')
+      .use('http://foo.com/upload')
+      .post(fs.createReadStream('./file.jpg'), function(err) {
+        console.info(err || 'uploaded!');
+      })
+    ;
+
+Pipe the output of the response to a stream.
+
+    require('mdoq')
+      .require('mdoq-http')
+      .use('http://foo.com/file.jpg')
+      .pipe(fs.createWriteStream('./file.jpg'))
+      .get(function(err) {
+        if(err) console.info('the stream error', err);
+        else console.info('the stream finished without error');
+        
+        // if you need the output stream
+        console.info(this.req.destinationStream);
+      })
 
 ## API
 
