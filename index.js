@@ -8,66 +8,71 @@ var request = require('request')
 var middleware = function(req, res, next, use) {
   var self = this
     , options = {}
-    , query = qs.stringify(req.query);
+    , query = qs.stringify(req.query)
+    , stream
+  ;
 
-  // transform req into request options
+  // build options
   options.url = req.url + (query && '?' + query) || '';
   options.method = req.method;
   options.headers = req.headers;
 
-  if((req.method === 'POST' || req.method === 'PUT') && req.body && req.body.readable) {
-    req.body.pause();
-    req.body.pipe(request(options, function(err, response, body) {
-      response && Object.keys(response).forEach(function (key) {
-        res[key] = response[key];
-      });
-
-      res.data = body;
-      next(err);
-    }));
-    req.body.resume();
-  } else if(req.destinationStream) {
-    // streaming get
-    var out = request(options).pipe(req.destinationStream)
-      , err;
-      
-    out.on('error', function (e) {
-      err = e;
+  switch(req.method) {
+    case 'POST':
+    case 'PUT':
+      if(req.body && req.body.readable && typeof req.body.pipe === 'function') {
+        stream = req.body
+        break;
+      } else if(Buffer.isBuffer(req.body || req.data)) {
+        options.body = req.body || req.data;
+      } else if(typeof req.body === 'object') {
+        options.json = req.body;
+      } else {
+        options.body = req.body || req.data;
+      }
+    case 'GET':
+    case 'DELETE':
+    default:
+    break;
+  }
+  
+  // exec
+  var r = request(options, function (err, response, body) {
+    
+    // merge response objects
+    response && Object.keys(response).forEach(function (key) {
+      res[key] = response[key];
     });
     
-    out.on('close', function () {
-      next(err);
-    });
-  } else {
-    if(typeof req.body === 'object') {
-      options.json = req.data || true;
+    // parse if json
+    if(isJSON(response, body)) {
+      body = res.data = JSON.parse(response.body);
     }
     
-    request(options, function(err, response, body) {
-      if(err) return next(err);
-      
-      // merge res
-      response && Object.keys(response).forEach(function (key) {
-        res[key] = response[key];
-      });
-      
-      // json content type
-      if(response && response.headers['content-type'] && ~response.headers['content-type'].indexOf('application/json') && typeof body === 'string') {
-        body = res.data = JSON.parse(response.body);
-      }
-      
-      res.data = body;
-
-      next(err);
-    });
-  }
-
-
+    // mdoq compatability
+    res.data = body;
+    
+    next(err);
+  });
+  
+  // stream up
+  stream && stream.pipe(r);
+  
+  // stream down
+  req.destinationStream && r.pipe(req.destinationStream);
 }
 
 /**
  * Utils
  */
+ 
+function isJSON(response, body) {
+  return response
+    && typeof body === 'string'
+    && response.headers['content-type']
+    && ~response.headers['content-type'].indexOf('application/json')
+  ;
+}
  
 middleware.addHeader = function (key, val) {
   ((this.req = this.req || {}).headers || (this.req.headers = {}))[key] = val;
