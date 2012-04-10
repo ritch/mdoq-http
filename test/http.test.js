@@ -18,6 +18,8 @@ beforeEach(function(done){
   
   app.use(function(req, res) {
     
+    if(req.url === '/empty') return res.end();
+    
     if(req.method == 'POST' && ~req.headers['content-type'].indexOf('jpeg')) { 
       res.header('Content-Type', req.header('Content-Type'));
       req.pipe(res);
@@ -153,6 +155,37 @@ describe('MDOQ HTTP', function(){
 
   })
   
+  describe('Nested Requests', function(){
+    it('should not lose context', function(done) {
+      http.use('/test').get(function(err, body, req, res) {
+        expect(body).to.exist;
+        expect(body.method).to.equal('GET');
+        expect(err).to.not.exist;
+        expect(body).to.be.a('object');
+        expect(body.url).to.equal('/test');
+        expect(res).to.exist;
+        expect(res.statusCode).to.equal(200);
+        http.use('/test1').put({test: 123}, function(err, body, req, res) {
+          expect(body.method).to.equal('PUT');
+          expect(body.body.test).to.equal(123);
+          expect(body.url).to.equal('/test1');
+          expect(res).to.exist;
+          expect(res.statusCode).to.equal(200);
+          http.use('/empty').post({test: 123}, function(err, body, req, res) {
+            expect(body).to.not.exist;
+            http.use('/test2').del(function(err, body, req, res) {
+              expect(body.method).to.equal('DELETE');
+              expect(res).to.exist;
+              expect(res.statusCode).to.equal(200);
+              expect(body.url).to.equal('/test2');
+              done(err);
+            })
+          })
+        })
+      })
+    })
+  })
+  
   describe('Modifiers', function(){
     describe('client.addHeader(key, val)', function(){
       it('should add the header to the request', function(done) {
@@ -173,7 +206,7 @@ describe('MDOQ HTTP', function(){
         expect(res).to.exist;
         done(err);
       });
-    })
+    });
     
     it('should stream the file', function(done) {
       var out = fs.createWriteStream(__dirname + '/support/got-eg.jpg');
