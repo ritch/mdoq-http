@@ -56,7 +56,10 @@ var middleware = function(req, res, next, use) {
   });
   
   // stream up
-  stream && stream.pipe(r);
+  if(stream) {
+    stream.pipe(r);
+    stream.resume();
+  }
   
   // stream down
   req.destinationStream && r.pipe(req.destinationStream);
