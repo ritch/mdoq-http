@@ -82,8 +82,9 @@ middleware.addHeader = function (key, val) {
   return this;
 }
 
-middleware.pipe = function (destination) {
-  this.req.destinationStream = destination;
+middleware.pipe = function (destination, fn) {
+  (this.req || (this.req = {})).destinationStream = destination;
+  if(fn) this.get(fn);
   return this;
 }
 
